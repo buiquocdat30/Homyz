@@ -29,7 +29,7 @@ export const createResidency = asyncHandler(async (req, res) => {
         country,
         image,
         facilities,
-        //userEmail, bỏ đi vì nó là  Prisma báo lỗi do đây là foreign key
+        //userEmail, bỏ đi vì nó Prisma báo lỗi do đây là foreign key
         owner: { connect: { email: userEmail } },
       },
     });
