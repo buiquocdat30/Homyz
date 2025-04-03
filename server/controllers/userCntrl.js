@@ -5,7 +5,7 @@ import { prisma } from "../config/prismaConfig.js";
 export const createUser = asyncHandler(async (req, res) => {
   console.log("Creating a user");
 
-  let { email } = req.body;// Lấy email từ request body
+  let { email } = req.body; // Lấy email từ request body
 
   // Tìm người dùng trong database dựa vào email
   const userExists = await prisma.user.findUnique({ where: { email: email } });
@@ -51,7 +51,7 @@ export const bookVisit = asyncHandler(async (req, res) => {
       await prisma.user.update({
         where: { email: email },
         data: {
-          bookedVisits: { push: { id, date } },// Đẩy một object {id, date} vào mảng bookedVisits
+          bookedVisits: { push: { id, date } }, // Đẩy một object {id, date} vào mảng bookedVisits
         },
       });
 
@@ -122,6 +122,46 @@ export const cancelBooking = asyncHandler(async (req, res) => {
 
     // 6️⃣ Gửi phản hồi thành công
     res.status(200).json({ message: "Booking canceled successfully" });
+  } catch (error) {
+    // Bắt lỗi nếu có vấn đề xảy ra
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
+
+//function to add resd in favourite list of a user
+export const toFav = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const { rid } = req.params;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (user.favResidenciesiD.includes(rid)) {
+      const updateUser=await prisma.user.update({
+        where: {email},
+        data: {
+          favResidenciesiD:{
+            set:user.favResidenciesiD.filter((id)=>id!==rid)
+          }
+        } 
+      })
+
+      res.status(200).json({message:"Removed from favorites",user:updateUser})
+    } else {
+      const updateUser=await prisma.user.update({
+        where:{email},
+        data:{
+          favResidenciesiD:{
+            push:rid
+          }
+        }
+      })
+      res.status(200).json({message:"Updated  favorites",user:updateUser})
+    }
   } catch (error) {
     // Bắt lỗi nếu có vấn đề xảy ra
     res
